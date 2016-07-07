@@ -1,0 +1,94 @@
+html {
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body {
+	margin-top: 0;
+}
+
+.leaflet-popup-content h4 {
+	margin-top: 0;
+}
+
+.icon {
+	background-image: url(/walkabout-style-more-labels/images/poi_icons_18@2x.png);
+	background-size: 502px 247px;
+}
+
+.icon-marker-destination {
+	background-position: -277px -147px;
+}
+
+.icon-marker-start {
+	background-position: -316px -147px;
+}
+
+.icon-marker-position {
+	background-position: -351px -147px;
+}
+
+/* Override styleguide.css */
+.leaflet-pelias-input::-moz-placeholder {
+	line-height: 34px;
+}
+
+.leaflet-routing-alternatives-container {
+	font-family: "open sans", sans-serif;
+	font-size: 1.25em;
+}
+
+.leaflet-routing-alt {
+	max-height: calc(100vh - 33px);
+}
+
+.leaflet-routing-alt .start {
+	padding: 0 10px;
+}
+
+.leaflet-routing-alt .info {
+	padding: 0 10px 10px 10px;
+	font-size: 0.85em;
+	opacity: 0.85;
+}
+
+.leaflet-routing-alt .info::before {
+	display: none;
+}
+
+.leaflet-routing-alt td {
+	padding: 10px 0 10px 10px;
+	vertical-align: top;
+	border-top: 1px solid #dedede;
+}
+
+.leaflet-routing-alt td:last-child {
+	padding-right: 10px;
+	font-size: 0.75em;
+	opacity: 0.85;
+	white-space: nowrap;
+	text-align: right;
+}
+
+.buttons {
+	margin-top: 10px;
+}
+
+.buttons .btn {
+	margin-right: 10px;
+}
+
+.leaflet-container .btn-transparent {
+	font-weight: normal;
+	color: #444;
+}
+
+.loading-spinner-02 {
+	display: inline-block;
+	margin-left: -7px;
+	margin-top: -4px;
+	vertical-align: top;
+}
