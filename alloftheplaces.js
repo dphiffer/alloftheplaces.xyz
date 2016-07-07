@@ -1,31 +1,22 @@
-var map = L.Mapzen.map('map', {
+
+var map_options = {
 	scene: '/lib/walkabout/walkabout-style-more-labels.yaml',
 	zoomControl: false,
 	scrollWheelZoom: false
-});
+};
 
-var zoom = new L.Control.Zoom({
-	position: 'bottomright'
-}).addTo(map);
-
-/*var geocoder = L.Mapzen.geocoder($(document.body).data('search-api-key'));
-geocoder.addTo(map);
-geocoder.on('select', function(e) {
-  console.log(e.feature);
-});*/
-
-if ($('#map').data('bbox')) {
+if ($('#map').data('latlng')) {
+	var coords = $('#map').data('latlng').split(',');
+	var lat = parseFloat(coords[0]);
+	var lng = parseFloat(coords[1]);
+	map_options.center = [lat, lng];
+	map_options.zoom = 14;
+} else if ($('#map').data('bbox')) {
 	var coords = $('#map').data('bbox').split(',');
 	var bbox = [
 		[parseFloat(coords[1]), parseFloat(coords[0])],
 		[parseFloat(coords[3]), parseFloat(coords[2])]
 	];
-	map.fitBounds(bbox);
-} else if ($('#map').data('latlng')) {
-	var coords = $('#map').data('latlng').split(',');
-	var lat = parseFloat(coords[0]);
-	var lng = parseFloat(coords[1]);
-	map.setView([lat, lng], 16);
 } else {
 	$.get('https://ip.dev.mapzen.com/?raw=1', function(rsp) {
 		if (! rsp.geom_bbox) {
@@ -40,6 +31,21 @@ if ($('#map').data('bbox')) {
 		map.fitBounds(bbox);
 	});
 }
+
+var map = L.Mapzen.map('map', map_options);
+if (bbox) {
+	map.fitBounds(bbox);
+}
+
+var zoom = new L.Control.Zoom({
+	position: 'bottomright'
+}).addTo(map);
+
+/*var geocoder = L.Mapzen.geocoder($(document.body).data('search-api-key'));
+geocoder.addTo(map);
+geocoder.on('select', function(e) {
+  console.log(e.feature);
+});*/
 
 L.Mapzen.bug({
 	name: 'Who’s On First',
