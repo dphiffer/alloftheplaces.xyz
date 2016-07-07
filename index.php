@@ -59,6 +59,7 @@ if (preg_match('/^\/(\d+)/', $_SERVER['REQUEST_URI'], $matches)) {
 		<link rel="stylesheet" href="https://mapzen.com/common/styleguide/styles/styleguide.css">
 		<link rel="stylesheet" href="/lib/lrm-mapzen/dist/leaflet.routing.mapzen.css">
 		<link rel="stylesheet" href="/alloftheplaces.css">
+		<link rel="shortcut icon" href="https://mapzen.com/common/styleguide/images/favicon.ico">
 		<meta name="id" content="<?php echo htmlentities($props['wof:id']); ?>">
 		<?php if (! empty($address)) { ?>
 		<meta name="address" content="<?php echo htmlentities($address); ?>">
