@@ -1,9 +1,16 @@
 
+var marker, router;
 var map_options = {
 	scene: '/lib/walkabout/walkabout-style-more-labels.yaml',
 	zoomControl: false,
 	scrollWheelZoom: false
 };
+
+/*var geocoder = L.Mapzen.geocoder($(document.body).data('search-api-key'));
+geocoder.addTo(map);
+geocoder.on('select', function(e) {
+  console.log(e.feature);
+});*/
 
 if ($('#map').data('latlng')) {
 	var coords = $('#map').data('latlng').split(',');
@@ -41,12 +48,6 @@ var zoom = new L.Control.Zoom({
 	position: 'bottomright'
 }).addTo(map);
 
-/*var geocoder = L.Mapzen.geocoder($(document.body).data('search-api-key'));
-geocoder.addTo(map);
-geocoder.on('select', function(e) {
-  console.log(e.feature);
-});*/
-
 L.Mapzen.bug({
 	name: 'Who’s On First',
 	link: 'https://alloftheplaces.xyz',
@@ -57,8 +58,6 @@ L.Mapzen.bug({
 var locator = L.Mapzen.locator();
 locator.setPosition('bottomright');
 locator.addTo(map);
-
-var marker;
 
 //L.Mapzen.hash({
 //	map: map
@@ -85,6 +84,7 @@ if ($('#map').data('latlng')) {
 	            '<div class="buttons">' +
 	            '<button class="btn btn-mapzen btn-directions">Directions</button>' +
 	            '<a class="btn btn-transparent btn-wof" href="https://whosonfirst.mapzen.com/spelunker/id/' + id + '/">WOF record</a>' +
+		    '<div class="loading"><div class="loading-spinner-02"></div> Finding your location</div>' +
 		    '</div>';
 	marker.bindPopup(popup).openPopup();
 	$('#map').click(function(e) {
@@ -98,62 +98,21 @@ if ($('#map').data('latlng')) {
 }
 
 function get_directions(dest_pos) {
+
 	var curr_marker;
-	var api_key = $(document.body).data('routing-api-key');
-	var address = '';
-	if ($('meta[name=address]').length > 0) {
-		var address = $('meta[name=address]').attr('content');
-	}
-	var popup = '<h4>' + document.title + '</h4>' + address +
-	            '<div class="buttons">' +
-	            '<div class="loading-spinner-02"></div> Finding your location' +
-	            '</div>';
-	marker.setPopupContent(popup);
+	$('#map').addClass('loading');
 
 	navigator.geolocation.getCurrentPosition(function(start_pos) {
 		map.closePopup();
-		L.Routing.control({
-			waypoints: [
+		$('#map').removeClass('loading');
+		if (! router) {
+			create_router(start_pos, dest_pos);
+		} else {
+			router.setWaypoints([
 				L.latLng(start_pos.coords.latitude, start_pos.coords.longitude),
 				L.latLng(dest_pos.latitude, dest_pos.longitude)
-			],
-			router: L.Routing.mapzen(api_key, {
-				costing: 'multimodal',
-				costing_options: {
-					"transit": {
-						use_bus: 0.5,
-						use_rail: 0.6,
-						use_transfers: 0.4
-					}
-				}
-			}),
-			formatter: new L.Routing.mapzenFormatter({
-				units: 'imperial'
-			}),
-			summaryTemplate: '<div class="start">Directions to <strong>' + document.title + '</strong></div><div class="info {costing}">{time}, {distance}</div>',
-			fitSelectedRoutes: false,
-			routeWhileDragging: false,
-			addWaypoints: false,
-			routeLine: function (route, options) {
-				return L.Routing.mapzenLine(route, options);
-			},
-			createMarker: function(i, wp, n) {
-				return null;
-			},
-			pointMarkerStyle: {
-				radius: 5,
-				color: '#000',
-				fillColor: '#fff',
-				opacity: 1,
-				fillOpacity: 1
-			},
-			lineOptions: {
-				styles: [
-					{ color: 'white', opacity: 0.8, weight: 10, dashArray: [1, 10] },
-					{ color: '#15c7ff', opacity: 1, weight: 6, dashArray: [1, 10] }
-				]
-			}
-		}).setPosition('topleft').addTo(map);
+			]);
+		}
 		var start_latlng = [
 			start_pos.coords.latitude,
 			start_pos.coords.longitude
@@ -175,4 +134,50 @@ function get_directions(dest_pos) {
 			curr_marker.setLatLng(curr_latlng);
 		});
 	});
+}
+
+function create_router(start_pos, dest_pos) {
+	var api_key = $(document.body).data('routing-api-key');
+	router = L.Routing.control({
+		waypoints: [
+			L.latLng(start_pos.coords.latitude, start_pos.coords.longitude),
+			L.latLng(dest_pos.latitude, dest_pos.longitude)
+		],
+		router: L.Routing.mapzen(api_key, {
+			costing: 'multimodal',
+			costing_options: {
+				"transit": {
+					use_bus: 0.5,
+					use_rail: 0.6,
+					use_transfers: 0.4
+				}
+			}
+		}),
+		formatter: new L.Routing.mapzenFormatter({
+			units: 'imperial'
+		}),
+		summaryTemplate: '<div class="start">Directions to <strong>' + document.title + '</strong></div><div class="info {costing}">{time}, {distance}</div>',
+		fitSelectedRoutes: false,
+		routeWhileDragging: false,
+		addWaypoints: false,
+		routeLine: function (route, options) {
+			return L.Routing.mapzenLine(route, options);
+		},
+		createMarker: function(i, wp, n) {
+			return null;
+		},
+		pointMarkerStyle: {
+			radius: 5,
+			color: '#000',
+			fillColor: '#fff',
+			opacity: 1,
+			fillOpacity: 1
+		},
+		lineOptions: {
+			styles: [
+				{ color: 'white', opacity: 0.8, weight: 10, dashArray: [1, 10] },
+				{ color: '#15c7ff', opacity: 1, weight: 6, dashArray: [1, 10] }
+			]
+		}
+	}).setPosition('topleft').addTo(map);
 }

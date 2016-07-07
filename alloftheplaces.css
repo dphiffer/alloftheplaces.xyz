@@ -92,3 +92,15 @@ body {
 	margin-top: -4px;
 	vertical-align: top;
 }
+
+.leaflet-popup-content .loading {
+	display: none;
+}
+
+#map.loading .leaflet-popup-content .loading {
+	display: block;
+}
+
+#map.loading .leaflet-popup-content .btn {
+	display: none;
+}
