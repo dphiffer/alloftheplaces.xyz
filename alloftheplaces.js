@@ -1,5 +1,5 @@
 var map = L.Mapzen.map('map', {
-	scene: '/walkabout-style-more-labels/walkabout-style-more-labels.yaml',
+	scene: '/lib/walkabout/walkabout-style-more-labels.yaml',
 	zoomControl: false,
 	scrollWheelZoom: false
 });

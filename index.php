@@ -57,7 +57,7 @@ if (preg_match('/^\/(\d+)/', $_SERVER['REQUEST_URI'], $matches)) {
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="stylesheet" href="https://mapzen.com/js/mapzen.css">
 		<link rel="stylesheet" href="https://mapzen.com/common/styleguide/styles/styleguide.css">
-		<link rel="stylesheet" href="/lrm-mapzen/dist/leaflet.routing.mapzen.css">
+		<link rel="stylesheet" href="/lib/lrm-mapzen/dist/leaflet.routing.mapzen.css">
 		<link rel="stylesheet" href="/alloftheplaces.css">
 		<meta name="id" content="<?php echo htmlentities($props['wof:id']); ?>">
 		<?php if (! empty($address)) { ?>
@@ -79,8 +79,8 @@ if (preg_match('/^\/(\d+)/', $_SERVER['REQUEST_URI'], $matches)) {
 		?>></div>
 		<script src="https://mapzen.com/common/styleguide/scripts/mapzen-styleguide.min.js"></script>
 		<script src="/jquery-3.0.0.min.js"></script>
-		<script src="/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
-		<script src="/lrm-mapzen/dist/lrm-mapzen.min.js"></script>
+		<script src="/lib/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
+		<script src="/lib/lrm-mapzen/dist/lrm-mapzen.min.js"></script>
 		<script src="/alloftheplaces.js"></script>
 	</body>
 </html>
