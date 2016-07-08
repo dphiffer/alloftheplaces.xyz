@@ -2,7 +2,7 @@
 var marker, router, curr_marker;
 var map_options = {
 	scene: '/lib/walkabout/walkabout-style-more-labels.yaml',
-	zoomControl: false,
+	//zoomControl: false,
 	scrollWheelZoom: false
 };
 var is_mobile = (window.innerWidth < 472);

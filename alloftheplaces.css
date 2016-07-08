@@ -130,3 +130,9 @@ body.routing .leaflet-top {
 	z-index: 9999;
 	cursor: pointer;
 }
+
+/* zoomControl: false breaks on iOS 8 */
+.leaflet-top .leaflet-control-zoom-in,
+.leaflet-top .leaflet-control-zoom-out {
+	display: none;
+}
