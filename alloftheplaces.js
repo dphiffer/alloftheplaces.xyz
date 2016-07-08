@@ -125,7 +125,7 @@ function get_directions(dest_pos) {
 				popupAnchor: [0, 0]
 			})
 		}).addTo(map);
-		map.setView(start_latlng, 16);
+		//map.setView(start_latlng, 16);
 		var watch = navigator.geolocation.watchPosition(function(curr_pos) {
 			var curr_latlng = [
 				curr_pos.coords.latitude,
@@ -153,11 +153,9 @@ function create_router(start_pos, dest_pos) {
 				}
 			}
 		}),
-		formatter: new L.Routing.mapzenFormatter({
-			units: 'imperial'
-		}),
+		formatter: new L.Routing.mapzenFormatter(),
 		summaryTemplate: '<div class="start">Directions to <strong>' + document.title + '</strong></div><div class="info {costing}">{time}, {distance}</div>',
-		fitSelectedRoutes: false,
+		fitSelectedRoutes: true,
 		routeWhileDragging: false,
 		addWaypoints: false,
 		routeLine: function (route, options) {
@@ -180,4 +178,16 @@ function create_router(start_pos, dest_pos) {
 			]
 		}
 	}).setPosition('topleft').addTo(map);
+
+	router.on('routingerror', function(e) {
+		console.log('routingerror', e);
+		if (e && e.error && e.error.message) {
+			$('.leaflet-routing-alternatives-container').html(
+				'<div class="leaflet-routing-alt">' +
+				'<div class="start">Directions to <strong>' + document.title + '</strong></div>' +
+				'<div class="routing-error">' + e.error.message + '</div>' +
+				'</div>'
+			);
+		}
+	});
 }
