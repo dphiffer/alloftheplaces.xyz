@@ -1,10 +1,13 @@
 
-var marker, router;
+var marker, router, curr_marker;
 var map_options = {
 	scene: '/lib/walkabout/walkabout-style-more-labels.yaml',
 	zoomControl: false,
 	scrollWheelZoom: false
 };
+var is_mobile = (window.innerWidth < 472);
+var bounds_tl = is_mobile ? [15, 200] : [320, 30];
+var bounds_br = is_mobile ? [15, 15]  : [30, 30];
 
 /*var geocoder = L.Mapzen.geocoder($(document.body).data('search-api-key'));
 geocoder.addTo(map);
@@ -99,40 +102,30 @@ if ($('#map').data('latlng')) {
 
 function get_directions(dest_pos) {
 
-	var curr_marker;
 	$('#map').addClass('loading');
 
-	navigator.geolocation.getCurrentPosition(function(start_pos) {
+	navigator.geolocation.watchPosition(function(pos) {
 		map.closePopup();
 		$('#map').removeClass('loading');
 		if (! router) {
-			create_router(start_pos, dest_pos);
-		} else {
-			router.setWaypoints([
-				L.latLng(start_pos.coords.latitude, start_pos.coords.longitude),
-				L.latLng(dest_pos.latitude, dest_pos.longitude)
-			]);
+			create_router(pos, dest_pos);
 		}
-		var start_latlng = [
-			start_pos.coords.latitude,
-			start_pos.coords.longitude
+		var latlng = [
+			pos.coords.latitude,
+			pos.coords.longitude
 		];
-		var curr_marker = L.marker(start_latlng, {
-			icon: L.divIcon({
-				className: 'icon icon-marker icon-marker-position',
-				iconSize: [42, 42],
-				iconAnchor: [21, 21],
-				popupAnchor: [0, 0]
-			})
-		}).addTo(map);
-		//map.setView(start_latlng, 16);
-		var watch = navigator.geolocation.watchPosition(function(curr_pos) {
-			var curr_latlng = [
-				curr_pos.coords.latitude,
-				curr_pos.coords.longitude
-			];
-			curr_marker.setLatLng(curr_latlng);
-		});
+		if (! curr_marker) {
+			curr_marker = L.marker(latlng, {
+				icon: L.divIcon({
+					className: 'icon icon-marker icon-marker-position',
+					iconSize: [42, 42],
+					iconAnchor: [21, 21],
+					popupAnchor: [0, 0]
+				})
+			}).addTo(map);
+			map.setView(latlng, 16);
+		}
+		curr_marker.setLatLng(latlng);
 	});
 }
 
@@ -155,7 +148,6 @@ function create_router(start_pos, dest_pos) {
 		}),
 		formatter: new L.Routing.mapzenFormatter(),
 		summaryTemplate: '<div class="start">Directions to <strong>' + document.title + '</strong></div><div class="info {costing}">{time}, {distance}</div>',
-		fitSelectedRoutes: true,
 		routeWhileDragging: false,
 		addWaypoints: false,
 		routeLine: function (route, options) {
@@ -179,8 +171,11 @@ function create_router(start_pos, dest_pos) {
 		}
 	}).setPosition('topleft').addTo(map);
 
+	router.on('routesfound', function(e) {
+		$(document.body).addClass('routing');
+	});
+
 	router.on('routingerror', function(e) {
-		console.log('routingerror', e);
 		if (e && e.error && e.error.message) {
 			$('.leaflet-routing-alternatives-container').html(
 				'<div class="leaflet-routing-alt">' +
@@ -190,4 +185,43 @@ function create_router(start_pos, dest_pos) {
 			);
 		}
 	});
+
+	// Adapted from https://mapzen.com/resources/projects/turn-by-turn/demo/demo.js
+
+	// Adjust padding for fitBounds()
+	// ==============================
+	//
+	// See this discussion: https://github.com/perliedman/leaflet-routing-machine/issues/60
+	// We override Leaflet's default fitBounds method to use our padding options by
+	// default. Thus, LRM calls fitBounds() as is. Additionally, any other scripts
+	// that call for fitBounds() can take advantage of the same padding behaviour.
+	map.origFitBounds = map.fitBounds;
+	map.fitBounds = function (bounds, options) {
+		map.origFitBounds(bounds, {
+			// Left padding accounts for the narrative window.
+			// Top padding accounts for the floating section navigation bar.
+			// These conditions apply only when the viewport breakpoint is at
+			// desktop screens or higher. Otherwise, assume that the narrative
+			// window is not present, and that the section navigation is
+			// condensed, so less padding is required on mobile viewports.
+			paddingTopLeft: bounds_tl,
+			// Bottom and right padding accounts only for slight
+			// breathing room, in order to prevent markers from appearing
+			// at the very edge of maps.
+			paddingBottomRight: bounds_br,
+		});
+	};
+
+	// Adjust offset for panTo()
+	// ==============================
+	map.origPanTo = map.panTo;
+	// In LRM, coordinate is array format [lat, lng]
+	map.panTo = function (coordinate) {
+		var offset_x = Math.round((bounds_tl[0] - bounds_br[0]) / 2);
+		var offset_y = Math.round((bounds_tl[1] - bounds_br[1]) / 2);
+		var x = map.latLngToContainerPoint(coordinate).x - offset_x;
+		var y = map.latLngToContainerPoint(coordinate).y - offset_y;
+		var point = map.containerPointToLatLng([x, y]);
+		map.origPanTo(point);
+	};
 }

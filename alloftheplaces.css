@@ -38,11 +38,26 @@ body {
 
 .leaflet-routing-alternatives-container {
 	font-family: "open sans", sans-serif;
-	font-size: 1.25em;
 }
 
 .leaflet-routing-alt {
-	max-height: calc(100vh - 33px);
+	max-height: 200px;
+}
+
+body.routing .leaflet-top {
+	position: fixed;
+}
+
+@media (min-width: 350px) {
+	.leaflet-routing-alt {
+		max-height: calc(100vh - 33px);
+	}
+	body.routing .leaflet-top {
+		position: absolute;
+	}
+	.leaflet-routing-alternatives-container {
+		font-size: 1.25em;
+	}
 }
 
 .leaflet-routing-alt .start {
@@ -109,4 +124,9 @@ body {
 	border-top: 1px solid #dedede;
 	margin-top: 10px;
 	padding: 10px 10px 0 10px;
+}
+
+.leaflet-routing-collapse-btn {
+	z-index: 9999;
+	cursor: pointer;
 }
