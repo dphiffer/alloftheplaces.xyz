@@ -45,6 +45,17 @@ if (preg_match('/^\/(\d+)/', $_SERVER['REQUEST_URI'], $matches)) {
 	}
 	if (! empty($props['addr:full'])) {
 		$address = $props['addr:full'];
+	} else if (! empty($props['sg:address'])) {
+		$address = $props['sg:address'];
+		if (! empty($props['sg:city'])) {
+			$address .= ", {$props['sg:city']}";
+		}
+		if (! empty($props['sg:province'])) {
+			$address .= ", {$props['sg:province']}";
+		}
+		if (! empty($props['sg:postcode'])) {
+			$address .= " {$props['sg:postcode']}";
+		}
 	}
 }
 
