@@ -151,3 +151,60 @@ body.routing .leaflet-top {
 	padding-bottom: 1.25em;
 	box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.2);
 }
+
+.routing-tabs span {
+	float: left;
+	cursor: pointer;
+	padding: 3px 10px 5px 0;
+	font-size: 0.85em;
+	text-transform: uppercase;
+	margin-right: 1px;
+	opacity: 0.5;
+	border-top: 2px solid #fff;
+}
+
+.routing-tabs .selected {
+	opacity: 1;
+	background-color: #eee;
+	border-top: 2px solid #000;
+}
+
+.routing-tabs span:hover {
+	opacity: 1;
+}
+
+.routing-tabs::after {
+	display: table-cell;
+	clear: both;
+	content: "";
+}
+
+.routing-tabs span::before {
+	display: inline-block;
+	width: 24px;
+	height: 24px;
+	background-image: url(/lib/lrm-mapzen/dist/modes.icons.svg);
+	background-repeat: no-repeat;
+	background-size: 96px 24px;
+	vertical-align: bottom;
+	margin-right: 1px;
+	content: "";
+}
+
+.routing-tabs .routing-tabs-pedestrian::before {
+	background-position: -72px 0;
+}
+
+.routing-tabs .routing-tabs-bicycle::before {
+	background-position: -24px 0;
+	margin-right: 3px;
+}
+
+.routing-tabs .routing-tabs-multimodal::before {
+	background-position: -48px 0;
+	margin-right: 2px;
+}
+
+.routing-tabs .routing-tabs-auto::before {
+	margin-right: 3px;
+}

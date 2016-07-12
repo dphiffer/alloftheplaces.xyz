@@ -172,13 +172,19 @@ function get_directions(dest_pos) {
 }
 
 function create_router(start_pos, dest_pos) {
+	start_pos = L.latLng(
+		start_pos.coords.latitude,
+		start_pos.coords.longitude
+	);
+	dest_pos = L.latLng(dest_pos.latitude, dest_pos.longitude);
 	var api_key = $(document.body).data('routing-api-key');
-	router = L.Routing.control({
-		waypoints: [
-			L.latLng(start_pos.coords.latitude, start_pos.coords.longitude),
-			L.latLng(dest_pos.latitude, dest_pos.longitude)
-		],
-		router: L.Routing.mapzen(api_key, {
+	var dist = start_pos.distanceTo(dest_pos);
+	if (dist < 1609) {
+		var router_options = {
+			costing: 'pedestrian'
+		};
+	} else {
+		var router_options = {
 			costing: 'multimodal',
 			costing_options: {
 				"transit": {
@@ -187,9 +193,21 @@ function create_router(start_pos, dest_pos) {
 					use_transfers: 0.4
 				}
 			}
-		}),
+		};
+	}
+
+	var routing_tabs = '<div class="routing-tabs">' +
+	                   '<span class="routing-tab routing-tabs-pedestrian" data-costing="pedestrian">walk</span>' +
+	                   '<span class="routing-tab routing-tabs-bicycle" data-costing="bicycle">bike</span>' +
+	                   '<span class="routing-tab routing-tabs-multimodal" data-costing="multimodal">transit</span>' +
+	                   '<span class="routing-tab routing-tabs-auto" data-costing="auto">drive</span>' +
+	                   '</div>';
+
+	router = L.Routing.control({
+		waypoints: [start_pos, dest_pos],
+		router: L.Routing.mapzen(api_key, router_options),
 		formatter: new L.Routing.mapzenFormatter(),
-		summaryTemplate: '<div class="start">Directions to <strong>' + wof_name + '</strong></div><div class="info {costing}">{time}, {distance}</div>',
+		summaryTemplate: '<div class="start">Directions to <strong>' + wof_name + '</strong></div><div class="info {costing}">{time}, {distance}</div>' + routing_tabs,
 		routeWhileDragging: false,
 		addWaypoints: false,
 		routeLine: function (route, options) {
@@ -215,6 +233,11 @@ function create_router(start_pos, dest_pos) {
 
 	router.on('routesfound', function(e) {
 		$(document.body).addClass('routing');
+		var costing = router.getRouter().options.costing;
+		setTimeout(function() {
+			$('.routing-tabs .selected').removeClass('selected');
+			$('.routing-tabs .routing-tabs-' + costing).addClass('selected');
+		}, 0);
 	});
 
 	router.on('routingerror', function(e) {
@@ -225,6 +248,16 @@ function create_router(start_pos, dest_pos) {
 				'<div class="routing-error">' + e.error.message + '</div>' +
 				'</div>'
 			);
+		}
+	});
+
+	$('#map').click(function(e) {
+		if ($(e.target).hasClass('routing-tab')) {
+			var costing = $(e.target).data('costing');
+			$('.routing-tabs .selected').removeClass('selected');
+			$(e.target).addClass('selected');
+			router.getRouter().options.costing = costing;
+			router.route();
 		}
 	});
 
