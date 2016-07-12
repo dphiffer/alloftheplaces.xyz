@@ -193,18 +193,22 @@ body.routing .leaflet-top {
 
 .routing-tabs .routing-tabs-pedestrian::before {
 	background-position: -72px 0;
+	margin-right: -1px;
 }
 
 .routing-tabs .routing-tabs-bicycle::before {
 	background-position: -24px 0;
 	margin-right: 3px;
+	margin-left: 5px;
 }
 
 .routing-tabs .routing-tabs-multimodal::before {
 	background-position: -48px 0;
 	margin-right: 2px;
+	margin-left: 4px;
 }
 
 .routing-tabs .routing-tabs-auto::before {
 	margin-right: 3px;
+	margin-left: 5px;
 }
