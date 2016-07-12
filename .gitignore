@@ -4,3 +4,6 @@
 /lib/leaflet-routing-machine
 /lib/lrm-mapzen
 /lib/walkabout
+/lib/bootstrap
+/lib/jquery.min.js
+/lib/mapzen.whosonfirst.data.js
