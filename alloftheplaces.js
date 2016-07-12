@@ -87,8 +87,8 @@ if ($('#map').data('latlng')) {
 	            '<div class="buttons">' +
 	            '<button class="btn btn-mapzen btn-directions">Directions</button>' +
 	            '<a class="btn btn-transparent btn-wof" href="https://whosonfirst.mapzen.com/spelunker/id/' + id + '/">WOF record</a>' +
-		    '<div class="loading"><div class="loading-spinner-02"></div> Finding your location</div>' +
-		    '</div>';
+	            '<div class="loading"><div class="loading-spinner-02"></div> Finding your location</div>' +
+	            '</div>';
 	marker.bindPopup(popup).openPopup();
 	$('#map').click(function(e) {
 		if ($(e.target).hasClass('btn-directions')) {
@@ -98,6 +98,18 @@ if ($('#map').data('latlng')) {
 			});
 		}
 	});
+	if (wof.geometry && wof.geometry.type != 'Point') {
+		var layer = L.geoJson(wof, {
+			style: {
+				"color": "#ff0066",
+				"weight": 2,
+				"opacity": 1,
+				"fillColor": "#ff69b4",
+				"fillOpacity": 0.6
+			}
+		});
+		layer.addTo(map);
+	}
 }
 
 function get_directions(dest_pos) {
