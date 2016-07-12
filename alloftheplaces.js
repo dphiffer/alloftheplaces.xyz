@@ -83,7 +83,8 @@ if ($('#map').data('latlng')) {
 		var address = $('meta[name=address]').attr('content');
 	}
 	var id = $('meta[name=id]').attr('content');
-	var popup = '<h4>' + document.title + '</h4>' + address +
+	var wof_name = wof.properties['wof:name'];
+	var popup = '<h4>' + wof_name + '</h4>' + address +
 	            '<div class="buttons">' +
 	            '<button class="btn btn-mapzen btn-directions">Directions</button>' +
 	            '<a class="btn btn-transparent btn-wof" href="https://whosonfirst.mapzen.com/spelunker/id/' + id + '/">WOF record</a>' +
@@ -159,7 +160,7 @@ function create_router(start_pos, dest_pos) {
 			}
 		}),
 		formatter: new L.Routing.mapzenFormatter(),
-		summaryTemplate: '<div class="start">Directions to <strong>' + document.title + '</strong></div><div class="info {costing}">{time}, {distance}</div>',
+		summaryTemplate: '<div class="start">Directions to <strong>' + wof_name + '</strong></div><div class="info {costing}">{time}, {distance}</div>',
 		routeWhileDragging: false,
 		addWaypoints: false,
 		routeLine: function (route, options) {
@@ -191,7 +192,7 @@ function create_router(start_pos, dest_pos) {
 		if (e && e.error && e.error.message) {
 			$('.leaflet-routing-alternatives-container').html(
 				'<div class="leaflet-routing-alt">' +
-				'<div class="start">Directions to <strong>' + document.title + '</strong></div>' +
+				'<div class="start">Directions to <strong>' + wof_name + '</strong></div>' +
 				'<div class="routing-error">' + e.error.message + '</div>' +
 				'</div>'
 			);
