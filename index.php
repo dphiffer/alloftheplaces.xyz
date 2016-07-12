@@ -19,7 +19,8 @@ if (preg_match('/^\/(\d+)/', $_SERVER['REQUEST_URI'], $matches)) {
 	$cache_expiry = time() - 7200;
 
 	if (file_exists($cache_path) &&
-	    filemtime($cache_path) > $cache_expiry) {
+	    filemtime($cache_path) > $cache_expiry &&
+	    strpos($_SERVER['REQUEST_URI'], 'nocache') === false) {
 		$json = file_get_contents(__DIR__ . "/cache/$path");
 	} else {
 		$wof_url = "https://whosonfirst.mapzen.com/$path";
