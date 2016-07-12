@@ -14,10 +14,15 @@ if (preg_match('/^\/(\d+)/', $_SERVER['REQUEST_URI'], $matches)) {
 		$path .= substr("$id", $i, 3) . '/';
 	}
 	$path .= "$id.geojson";
-	if (file_exists(__DIR__ . "/cache/$path")) {
+
+	$cache_path = __DIR__ . "/cache/$path";
+	$cache_expiry = time() - 7200;
+
+	if (file_exists($cache_path) &&
+	    filemtime($cache_path) > $cache_expiry) {
 		$json = file_get_contents(__DIR__ . "/cache/$path");
 	} else {
-		$wof_url = "https://whosonfirst.mapzen.com/data/$path";
+		$wof_url = "https://whosonfirst.mapzen.com/$path";
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $wof_url);
 		curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -89,6 +94,11 @@ if (preg_match('/^\/(\d+)/', $_SERVER['REQUEST_URI'], $matches)) {
 			}
 
 		?>></div>
+		<script>
+
+		var wof = <?php echo $json; ?>;
+
+		</script>
 		<script src="https://mapzen.com/common/styleguide/scripts/mapzen-styleguide.min.js"></script>
 		<script src="/jquery-3.0.0.min.js"></script>
 		<script src="/lib/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
