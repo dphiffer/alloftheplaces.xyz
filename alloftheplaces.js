@@ -15,6 +15,7 @@ var routing_tabs = '<div class="routing-tabs">' +
                    '<span class="routing-tab routing-tabs-bicycle" data-costing="bicycle">bike</span>' +
                    '<span class="routing-tab routing-tabs-multimodal" data-costing="multimodal">transit</span>' +
                    '<span class="routing-tab routing-tabs-auto" data-costing="auto">drive</span>' +
+                   '<br class="clear">' +
                    '</div>';
 
 /*var geocoder = L.Mapzen.geocoder($(document.body).data('search-api-key'));
@@ -269,6 +270,7 @@ function create_router(start_pos, dest_pos) {
 			$('.leaflet-routing-alternatives-container').html(
 				'<div class="leaflet-routing-alt">' +
 				'<div class="start">Directions to <strong>' + wof_name + '</strong></div>' +
+				'<div class="info">Could not find a route</div>' +
 				routing_tabs +
 				'<div class="routing-error">' + e.error.message + '</div>' +
 				'</div>'
@@ -287,6 +289,7 @@ function create_router(start_pos, dest_pos) {
 			$(e.target).addClass('selected');
 			router.getRouter().options.costing = costing;
 			router.route();
+			$('.leaflet-routing-alt .info').html('<div class="loading"><div class="loading-spinner-02"></div> Loading route</div>');
 		}
 	});
 

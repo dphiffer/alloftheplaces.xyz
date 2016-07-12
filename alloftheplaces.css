@@ -126,7 +126,6 @@ body.routing .leaflet-top {
 
 .routing-error {
 	border-top: 1px solid #dedede;
-	margin-top: 10px;
 	padding: 10px 10px 0 10px;
 }
 
@@ -173,10 +172,8 @@ body.routing .leaflet-top {
 	opacity: 1;
 }
 
-.routing-tabs::after {
-	display: table-cell;
+.routing-tabs br.clear {
 	clear: both;
-	content: "";
 }
 
 .routing-tabs span::before {
