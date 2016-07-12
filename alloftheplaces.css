@@ -96,7 +96,11 @@ body.routing .leaflet-top {
 	margin-right: 10px;
 }
 
-.leaflet-container .btn-transparent {
+.leaflet-container .dropdown {
+	display: inline-block;
+}
+
+.leaflet-container #wof-links {
 	font-weight: normal;
 	color: #444;
 }

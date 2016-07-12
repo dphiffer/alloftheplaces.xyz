@@ -38,8 +38,10 @@ if (preg_match('/^\/(\d+)/', $_SERVER['REQUEST_URI'], $matches)) {
 		curl_close($ch);
 		if (is_writable(__DIR__ . "/cache") &&
 		    $status == 200) {
-			mkdir(dirname(__DIR__ . "/cache/$path"), 0755, true);
-			file_put_contents(__DIR__ . "/cache/$path", $json);
+			if (! file_exists(dirname($cache_path))) {
+				mkdir(dirname($cache_path), 0755, true);
+			}
+			file_put_contents($cache_path, $json);
 		}
 	}
 	$wof = json_decode($json, 'as hash');
@@ -79,6 +81,7 @@ if (preg_match('/^\/(\d+)/', $_SERVER['REQUEST_URI'], $matches)) {
 		<meta charset="utf-8">
 		<title><?php echo htmlentities($title); ?></title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.min.css">
 		<link rel="stylesheet" href="https://mapzen.com/js/mapzen.css">
 		<link rel="stylesheet" href="https://mapzen.com/common/styleguide/styles/styleguide.css">
 		<link rel="stylesheet" href="/lib/lrm-mapzen/dist/leaflet.routing.mapzen.css">
@@ -109,10 +112,12 @@ if (preg_match('/^\/(\d+)/', $_SERVER['REQUEST_URI'], $matches)) {
 
 		</script>
 		<?php } ?>
+		<script src="/lib/jquery.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
 		<script src="https://mapzen.com/common/styleguide/scripts/mapzen-styleguide.min.js"></script>
-		<script src="/jquery-3.0.0.min.js"></script>
 		<script src="/lib/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
 		<script src="/lib/lrm-mapzen/dist/lrm-mapzen.min.js"></script>
+		<script src="/lib/mapzen.whosonfirst.data.js"></script>
 		<script src="/alloftheplaces.js"></script>
 	</body>
 </html>

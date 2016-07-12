@@ -84,10 +84,39 @@ if ($('#map').data('latlng')) {
 	}
 	var id = $('meta[name=id]').attr('content');
 	var wof_name = wof.properties['wof:name'];
+
+	var wof_links = [];
+	wof_links.push('<a href="https://whosonfirst.mapzen.com/spelunker/id/' + id + '/">Spelunker</a>');
+	if (wof.properties['wof:repo']) {
+		var path = 'data/' + mapzen.whosonfirst.data.id2relpath(id);
+		if (wof.properties['wof:repo'] == 'whosonfirst-data') {
+			wof_links.push('<a href="https://github.com/whosonfirst/whosonfirst-data/tree/master/' + path + '">GitHub</a>');
+		} else {
+			wof_links.push('<a href="https://github.com/whosonfirst-data/' + wof.properties['wof:repo'] + '/tree/master/' + path + '">GitHub</a>');
+		}
+	}
+
+	if (wof.properties['wof:concordances'] &&
+	    wof.properties['wof:concordances']['4sq:id']) {
+		wof_links.push('<a href="https://foursquare.com/v/' + wof.properties['wof:concordances']['4sq:id'] + '/">Foursquare</a>');
+	}
+
+	var wof_links_list_items = '';
+	$.each(wof_links, function(i, link) {
+		wof_links_list_items += '<li>' + link + '</li>';
+	});
+
 	var popup = '<h4>' + wof_name + '</h4>' + address +
 	            '<div class="buttons">' +
 	            '<button class="btn btn-mapzen btn-directions">Directions</button>' +
-	            '<a class="btn btn-transparent btn-wof" href="https://whosonfirst.mapzen.com/spelunker/id/' + id + '/">WOF record</a>' +
+	            '<div class="dropdown">' +
+	            '<button class="btn btn-default dropdown-toggle" type="button" id="wof-links" data-toggle="dropdown" aria-haspopup="true">' +
+	            'Links <span class="caret"></span>' +
+	            '</button>' +
+	            '<ul class="dropdown-menu" aria-labelledby="wof-links">' +
+	            wof_links_list_items +
+	            '</ul>' +
+	            '</div>' +
 	            '<div class="loading"><div class="loading-spinner-02"></div> Finding your location</div>' +
 	            '</div>';
 	marker.bindPopup(popup).openPopup();
