@@ -86,6 +86,21 @@ if ($('#map').data('latlng')) {
 	var wof_name = wof.properties['wof:name'];
 
 	var wof_links = [];
+
+	if (wof.properties['addr:website']) {
+		var url = wof.properties['addr:website'];
+		if (! url.match(/^http/)) {
+			url = 'http://' + url;
+		}
+		wof_links.push('<a href="' + url + '/">Website</a>');
+	} else if (wof.properties['sg:website']) {
+		var url = wof.properties['sg:website'];
+		if (! url.match(/^http/)) {
+			url = 'http://' + url;
+		}
+		wof_links.push('<a href="' + url + '/">Website</a>');
+	}
+
 	wof_links.push('<a href="https://whosonfirst.mapzen.com/spelunker/id/' + id + '/">Spelunker</a>');
 	if (wof.properties['wof:repo']) {
 		var path = 'data/' + mapzen.whosonfirst.data.id2relpath(id);
@@ -241,6 +256,9 @@ function create_router(start_pos, dest_pos) {
 	});
 
 	router.on('routingerror', function(e) {
+
+
+
 		if (e && e.error && e.error.message) {
 			$('.leaflet-routing-alternatives-container').html(
 				'<div class="leaflet-routing-alt">' +
