@@ -1,5 +1,6 @@
 
 var marker, router, curr_marker;
+var auto_costing = true;
 var map_options = {
 	scene: '/lib/walkabout/walkabout-style-more-labels.yaml',
 	//zoomControl: false,
@@ -8,6 +9,13 @@ var map_options = {
 var is_mobile = (window.innerWidth < 472);
 var bounds_tl = is_mobile ? [15, 200] : [320, 30];
 var bounds_br = is_mobile ? [15, 15]  : [30, 30];
+
+var routing_tabs = '<div class="routing-tabs">' +
+                   '<span class="routing-tab routing-tabs-pedestrian" data-costing="pedestrian">walk</span>' +
+                   '<span class="routing-tab routing-tabs-bicycle" data-costing="bicycle">bike</span>' +
+                   '<span class="routing-tab routing-tabs-multimodal" data-costing="multimodal">transit</span>' +
+                   '<span class="routing-tab routing-tabs-auto" data-costing="auto">drive</span>' +
+                   '</div>';
 
 /*var geocoder = L.Mapzen.geocoder($(document.body).data('search-api-key'));
 geocoder.addTo(map);
@@ -92,13 +100,13 @@ if ($('#map').data('latlng')) {
 		if (! url.match(/^http/)) {
 			url = 'http://' + url;
 		}
-		wof_links.push('<a href="' + url + '/">Website</a>');
+		wof_links.push('<a href="' + url + '">Website</a>');
 	} else if (wof.properties['sg:website']) {
 		var url = wof.properties['sg:website'];
 		if (! url.match(/^http/)) {
 			url = 'http://' + url;
 		}
-		wof_links.push('<a href="' + url + '/">Website</a>');
+		wof_links.push('<a href="' + url + '">Website</a>');
 	}
 
 	wof_links.push('<a href="https://whosonfirst.mapzen.com/spelunker/id/' + id + '/">Spelunker</a>');
@@ -211,13 +219,6 @@ function create_router(start_pos, dest_pos) {
 		};
 	}
 
-	var routing_tabs = '<div class="routing-tabs">' +
-	                   '<span class="routing-tab routing-tabs-pedestrian" data-costing="pedestrian">walk</span>' +
-	                   '<span class="routing-tab routing-tabs-bicycle" data-costing="bicycle">bike</span>' +
-	                   '<span class="routing-tab routing-tabs-multimodal" data-costing="multimodal">transit</span>' +
-	                   '<span class="routing-tab routing-tabs-auto" data-costing="auto">drive</span>' +
-	                   '</div>';
-
 	router = L.Routing.control({
 		waypoints: [start_pos, dest_pos],
 		router: L.Routing.mapzen(api_key, router_options),
@@ -256,21 +257,31 @@ function create_router(start_pos, dest_pos) {
 	});
 
 	router.on('routingerror', function(e) {
-
-
-
 		if (e && e.error && e.error.message) {
+
+			if (auto_costing &&
+			    e.error.message == 'Cannot reach destination - too far from a transit stop') {
+				router.getRouter().options.costing = 'auto';
+				router.route();
+				return;
+			}
+
 			$('.leaflet-routing-alternatives-container').html(
 				'<div class="leaflet-routing-alt">' +
 				'<div class="start">Directions to <strong>' + wof_name + '</strong></div>' +
+				routing_tabs +
 				'<div class="routing-error">' + e.error.message + '</div>' +
 				'</div>'
 			);
+
+			var costing = router.getRouter().options.costing;
+			$('.routing-tabs .routing-tabs-' + costing).addClass('selected');
 		}
 	});
 
 	$('#map').click(function(e) {
 		if ($(e.target).hasClass('routing-tab')) {
+			auto_costing = false;
 			var costing = $(e.target).data('costing');
 			$('.routing-tabs .selected').removeClass('selected');
 			$(e.target).addClass('selected');
