@@ -158,11 +158,14 @@ body.routing .leaflet-top {
 	position: fixed;
 	top: 50%;
 	left: 50%;
-	width: 320px;
 	transform: translate3d(-50%, -50%, 0);
 	background: rgba(255, 255, 255, 0.9);
-	padding-bottom: 1.25em;
 	box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.2);
+}
+
+#error {
+	padding-bottom: 1.25em;
+	width: 320px;
 }
 
 .routing-tabs span {
@@ -257,4 +260,19 @@ body.routing .leaflet-top {
 
 .leaflet-popup-content {
 	margin: 13px;
+}
+
+#search-form {
+	width: 500px;
+	padding: 0;
+	top: 33%;
+}
+
+#search {
+	width: 100%;
+}
+
+#search:focus {
+	border-color: #15c7ff;
+	outline: 1px solid #15c7ff;
 }

@@ -82,6 +82,14 @@ var locator = L.Mapzen.locator();
 locator.setPosition('bottomright');
 locator.addTo(map);
 
+$("#search").typeahead({
+	source: [
+		"foo",
+		"bar",
+		"baz"
+	]
+});
+
 //L.Mapzen.hash({
 //	map: map
 //});
