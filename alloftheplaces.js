@@ -284,8 +284,8 @@ function create_router(start_pos, dest_pos) {
 	router.on('routingerror', function(e) {
 		if (e && e.error && e.error.message) {
 
-			if (auto_costing &&
-			    e.error.message == 'Cannot reach destination - too far from a transit stop') {
+			if (auto_costing) {
+				auto_costing = false;
 				router.getRouter().options.costing = 'auto';
 				router.options.lineOptions.styles = get_line_style('auto');
 				router.route();
