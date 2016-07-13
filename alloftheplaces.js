@@ -30,12 +30,22 @@ if ($('#map').data('latlng')) {
 	var lng = parseFloat(coords[1]);
 	map_options.center = [lat, lng];
 	map_options.zoom = 14;
+	if (! window.localStorage.units) {
+		$.get('https://ip.dev.mapzen.com/?raw=1', function(rsp) {
+			set_default_units(rsp.country_id);
+		});
+	}
 } else if ($('#map').data('bbox')) {
 	var coords = $('#map').data('bbox').split(',');
 	var bbox = [
 		[parseFloat(coords[1]), parseFloat(coords[0])],
 		[parseFloat(coords[3]), parseFloat(coords[2])]
 	];
+	if (! window.localStorage.units) {
+		$.get('https://ip.dev.mapzen.com/?raw=1', function(rsp) {
+			set_default_units(rsp.country_id);
+		});
+	}
 } else {
 	$.get('https://ip.dev.mapzen.com/?raw=1', function(rsp) {
 		if (! rsp.geom_bbox) {
@@ -48,6 +58,7 @@ if ($('#map').data('latlng')) {
 			[parseFloat(coords[3]), parseFloat(coords[2])]
 		];
 		map.fitBounds(bbox);
+		set_default_units(rsp.country_id);
 	});
 }
 
@@ -227,13 +238,19 @@ function create_router(start_pos, dest_pos) {
 		router_options.costing = 'multimodal';
 	}
 
+	if (window.localStorage && window.localStorage.units) {
+		var units = window.localStorage.units;
+	} else {
+		var units = 'metric';
+	}
+
 	router = L.Routing.control({
 		waypoints: [start_pos, dest_pos],
 		router: L.Routing.mapzen(api_key, router_options),
 		formatter: new L.Routing.MapzenFormatter({
-			units: 'imperial'
+			units: units
 		}),
-		summaryTemplate: '<div class="start">Directions to <strong>' + wof_name + '</strong></div><div class="info {costing}">{time}, {distance}</div>' + routing_tabs,
+		summaryTemplate: '<div class="start">Directions to <strong>' + wof_name + '</strong></div><div class="info {costing}">{time}, <span class="distance" title="Toggle units">{distance}</span></div>' + routing_tabs,
 		routeWhileDragging: false,
 		addWaypoints: false,
 		routeLine: function (route, options) {
@@ -278,7 +295,7 @@ function create_router(start_pos, dest_pos) {
 			$('.leaflet-routing-alternatives-container').html(
 				'<div class="leaflet-routing-alt">' +
 				'<div class="start">Directions to <strong>' + wof_name + '</strong></div>' +
-				'<div class="info">Could not find a route</div>' +
+				'<div class="info no-route">Could not find a route</div>' +
 				routing_tabs +
 				'<div class="routing-error">' + e.error.message + '</div>' +
 				'</div>'
@@ -301,6 +318,17 @@ function create_router(start_pos, dest_pos) {
 			$('.leaflet-routing-alt .info').html('<div class="loading"><div class="loading-spinner-02"></div> Loading route</div>');
 			if (window.localStorage) {
 				window.localStorage.costing = costing;
+			}
+		}
+
+		if ($(e.target).hasClass('distance')) {
+			if (window.localStorage && router) {
+				var curr_units = router.options.formatter.options.units;
+				var units = (curr_units == 'metric') ? 'imperial' : 'metric';
+				window.localStorage.units = units;
+				router.options.formatter.options.units = units;
+				$('.leaflet-routing-alt .info').html('<div class="loading"><div class="loading-spinner-02"></div> Loading route</div>');
+				router.route();
 			}
 		}
 	});
@@ -362,5 +390,16 @@ function get_line_style(costing) {
 			{ color: 'white', opacity: 0.8, weight: 10 },
 			{ color: '#ff69b4', opacity: 1, weight: 6 }
 		];
+	}
+}
+
+function set_default_units(country_id) {
+	if (window.localStorage) {
+		window.localStorage.units = 'metric';
+		if (country_id == 85633793 || // USA
+		    country_id == 85632181 || // Myanmar
+		    country_id == 85632249) { // Liberia
+			window.localStorage.units = 'imperial';
+		}
 	}
 }

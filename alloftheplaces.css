@@ -1,9 +1,9 @@
 html {
-  box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 *, *:before, *:after {
-  box-sizing: inherit;
+	box-sizing: inherit;
 }
 
 body {
@@ -68,6 +68,11 @@ body.routing .leaflet-top {
 	padding: 0 10px 10px 10px;
 	font-size: 0.85em;
 	opacity: 0.85;
+}
+
+.leaflet-routing-alt .distance:hover {
+	cursor: pointer;
+	background: #dedede;
 }
 
 .leaflet-routing-alt .info::before {
