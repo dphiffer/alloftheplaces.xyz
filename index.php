@@ -117,7 +117,7 @@ if (preg_match('/^\/(\d+)/', $_SERVER['REQUEST_URI'], $matches)) {
 		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
 		<script src="https://mapzen.com/common/styleguide/scripts/mapzen-styleguide.min.js"></script>
 		<script src="/lib/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
-		<script src="/lib/lrm-mapzen/dist/lrm-mapzen.min.js"></script>
+		<script src="/lib/lrm-mapzen/dist/lrm-mapzen.js"></script>
 		<script src="/lib/mapzen.whosonfirst.data.js"></script>
 		<script src="/alloftheplaces.js"></script>
 	</body>

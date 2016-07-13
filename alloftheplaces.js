@@ -203,27 +203,31 @@ function create_router(start_pos, dest_pos) {
 	dest_pos = L.latLng(dest_pos.latitude, dest_pos.longitude);
 	var api_key = $(document.body).data('routing-api-key');
 	var dist = start_pos.distanceTo(dest_pos);
-	if (dist < 1609) {
-		var router_options = {
-			costing: 'pedestrian'
-		};
-	} else {
-		var router_options = {
-			costing: 'multimodal',
-			costing_options: {
-				"transit": {
-					use_bus: 0.5,
-					use_rail: 0.6,
-					use_transfers: 0.4
-				}
+
+	var router_options = {
+		costing_options: {
+			transit: {
+				use_bus: 0.5,
+				use_rail: 0.6,
+				use_transfers: 0.4
 			}
-		};
+		}
+	};
+
+	if (window.localStorage && window.localStorage.costing) {
+		router_options.costing = window.localStorage.costing;
+	} else if (dist < 1609) {
+		router_options.costing = 'pedestrian';
+	} else {
+		router_options.costing = 'multimodal';
 	}
 
 	router = L.Routing.control({
 		waypoints: [start_pos, dest_pos],
 		router: L.Routing.mapzen(api_key, router_options),
-		formatter: new L.Routing.mapzenFormatter(),
+		formatter: new L.Routing.MapzenFormatter({
+			units: 'imperial'
+		}),
 		summaryTemplate: '<div class="start">Directions to <strong>' + wof_name + '</strong></div><div class="info {costing}">{time}, {distance}</div>' + routing_tabs,
 		routeWhileDragging: false,
 		addWaypoints: false,
@@ -241,11 +245,9 @@ function create_router(start_pos, dest_pos) {
 			fillOpacity: 1
 		},
 		lineOptions: {
-			styles: [
-				{ color: 'white', opacity: 0.8, weight: 10, dashArray: [1, 10] },
-				{ color: '#15c7ff', opacity: 1, weight: 6, dashArray: [1, 10] }
-			]
-		}
+			styles: get_line_style(router_options.costing)
+		},
+		collapsible: true
 	}).setPosition('topleft').addTo(map);
 
 	router.on('routesfound', function(e) {
@@ -263,6 +265,7 @@ function create_router(start_pos, dest_pos) {
 			if (auto_costing &&
 			    e.error.message == 'Cannot reach destination - too far from a transit stop') {
 				router.getRouter().options.costing = 'auto';
+				router.options.lineOptions.styles = get_line_style('auto');
 				router.route();
 				return;
 			}
@@ -288,8 +291,12 @@ function create_router(start_pos, dest_pos) {
 			$('.routing-tabs .selected').removeClass('selected');
 			$(e.target).addClass('selected');
 			router.getRouter().options.costing = costing;
+			router.options.lineOptions.styles = get_line_style(costing);
 			router.route();
 			$('.leaflet-routing-alt .info').html('<div class="loading"><div class="loading-spinner-02"></div> Loading route</div>');
+			if (window.localStorage) {
+				window.localStorage.costing = costing;
+			}
 		}
 	});
 
@@ -331,4 +338,24 @@ function create_router(start_pos, dest_pos) {
 		var point = map.containerPointToLatLng([x, y]);
 		map.origPanTo(point);
 	};
+}
+
+function get_line_style(costing) {
+	if (costing == 'pedestrian' ||
+	    costing == 'multimodal') {
+		return [
+			{ color: 'white', opacity: 0.8, weight: 10, dashArray: [1, 10] },
+			{ color: '#15c7ff', opacity: 1, weight: 6, dashArray: [1, 10] }
+		];
+	} else if (costing == 'bicycle') {
+		return [
+			{ color: 'white', opacity: 0.8, weight: 10, dashArray: [1, 10] },
+			{ color: '#0eaf4f', opacity: 1, weight: 6, dashArray: [1, 10] }
+		];
+	} else {
+		return [
+			{ color: 'white', opacity: 0.8, weight: 10 },
+			{ color: '#ff69b4', opacity: 1, weight: 6 }
+		];
+	}
 }

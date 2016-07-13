@@ -209,3 +209,38 @@ body.routing .leaflet-top {
 	margin-right: 3px;
 	margin-left: 5px;
 }
+
+.leaflet-top .leaflet-routing-container {
+	margin-top: 0;
+}
+
+.leaflet-routing-container-hide .leaflet-routing-collapse-btn {
+	left: 3px;
+	top: 1px;
+}
+
+.leaflet-routing-collapse-btn::after {
+	font: bold 16px/14px Tahoma, Verdana, sans-serif;
+	color: #c3c3c3;
+}
+
+
+.leaflet-routing-collapse-btn:hover::after {
+	color: #999;
+}
+
+.leaflet-routing-collapse-btn {
+	line-height: 22px;
+}
+
+.leaflet-top .leaflet-routing-container.leaflet-routing-container-hide {
+	margin-top: 0 !important;
+}
+
+.leaflet-popup-content-wrapper {
+	border-radius: 0;
+}
+
+.leaflet-popup-content {
+	margin: 13px;
+}
