@@ -169,10 +169,15 @@ if ($('#map').data('latlng')) {
 function get_directions(dest_pos) {
 
 	$('#map').addClass('loading');
+	var just_loaded = true;
 
 	navigator.geolocation.watchPosition(function(pos) {
-		map.closePopup();
-		$('#map').removeClass('loading');
+		if (just_loaded) {
+			map.closePopup();
+			$('#map').removeClass('loading');
+		}
+		just_loaded = false;
+
 		if (! router) {
 			create_router(pos, dest_pos);
 		}
