@@ -121,7 +121,33 @@ if ($('#map').data('latlng')) {
 		wof_links.push('<a href="' + url + '">Website</a>');
 	}
 
+	if (wof.properties['addr:phone']) {
+		var phone = wof.properties['addr:phone'];
+
+		if (phone.substr(0, 4) != 'tel:') {
+			phone = 'tel:' + phone;
+		}
+
+		// This is a bit US-centric, but ....
+		if (phone.substr(4, 1) != '+' &&
+		    phone.substr(4, 1) != '0') {
+			phone = 'tel:+1-' + phone.substr(4);
+		}
+		wof_links.push('<a href="' + phone + '">Phone</a>');
+	}
+
+	if (wof.properties['addr:email']) {
+		var email = wof.properties['addr:email'];
+
+		if (email.substr(0, 7) != 'mailto:') {
+			email = 'mailto:' + email;
+		}
+
+		wof_links.push('<a href="' + email + '">Email</a>');
+	}
+
 	wof_links.push('<a href="https://whosonfirst.mapzen.com/spelunker/id/' + id + '/">Spelunker</a>');
+
 	if (wof.properties['wof:repo']) {
 		var path = 'data/' + mapzen.whosonfirst.data.id2relpath(id);
 		if (wof.properties['wof:repo'] == 'whosonfirst-data') {
@@ -135,6 +161,18 @@ if ($('#map').data('latlng')) {
 	    wof.properties['wof:concordances']['4sq:id']) {
 		wof_links.push('<a href="https://foursquare.com/v/' + wof.properties['wof:concordances']['4sq:id'] + '/">Foursquare</a>');
 	}
+
+	var other_links = {
+		"addr:twitter": 'Twitter',
+		"addr:facebook": 'Facebook',
+		"addr:instagram": 'Instagram',
+		"addr:yelp": 'Yelp'
+	};
+	$.each(other_links, function(key, label) {
+		if (wof.properties[key]) {
+			wof_links.push('<a href="' + wof.properties[key] + '">' + label + '</a>');
+		}
+	});
 
 	var wof_links_list_items = '';
 	$.each(wof_links, function(i, link) {
