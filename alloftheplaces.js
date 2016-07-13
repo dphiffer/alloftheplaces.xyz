@@ -99,8 +99,27 @@ if ($('#map').data('latlng')) {
 		})
 	}).addTo(map);
 	var address = '';
-	if ($('meta[name=address]').length > 0) {
+	if (wof.properties['addr:housenumber'] &&
+	    wof.properties['addr:street'] &&
+	    wof.properties['wof:parent_id']) {
+		var address = wof.properties['addr:housenumber'] + ' ' +
+		              wof.properties['addr:street'];
+		$.get('/?geojson=' + wof.properties['wof:parent_id'], function(parent) {
+			var parent_id = parent.properties['wof:id'];
+			var parent_name = parent.properties['wof:name'];
+			var parent_link = ', <a href="/' + parent_id + '">' + parent_name + '</a>';
+			$('.address').append(parent_link);
+		});
+	} else if ($('meta[name=address]').length > 0) {
 		var address = $('meta[name=address]').attr('content');
+	} else {
+		var address = 'A ' + wof.properties['wof:placetype'];
+		$.get('/?geojson=' + wof.properties['wof:parent_id'], function(parent) {
+			var parent_id = parent.properties['wof:id'];
+			var parent_name = parent.properties['wof:name'];
+			var parent_link = ' in <a href="/' + parent_id + '">' + parent_name + '</a>';
+			$('.address').append(parent_link);
+		});
 	}
 	var id = $('meta[name=id]').attr('content');
 	var wof_name = wof.properties['wof:name'];
@@ -179,7 +198,8 @@ if ($('#map').data('latlng')) {
 		wof_links_list_items += '<li>' + link + '</li>';
 	});
 
-	var popup = '<h4>' + wof_name + '</h4>' + address +
+	var popup = '<h4>' + wof_name + '</h4>' +
+	            '<span class="address">' + address + '</span>' +
 	            '<div class="buttons">' +
 	            '<button class="btn btn-mapzen btn-directions">Directions</button>' +
 	            '<div class="dropdown">' +

@@ -9,6 +9,44 @@ $title = 'All of the Places';
 
 if (preg_match('/^\/(\d+)/', $_SERVER['REQUEST_URI'], $matches)) {
 	$id = $matches[1];
+	$json = get_wof_json($id);
+	$wof = json_decode($json, 'as hash');
+	$props = $wof['properties'];
+	if (! empty($props['wof:name'])) {
+		$title = "{$props['wof:name']} | All of the Places";
+	} else {
+		$title = "Place $id | All of the Places";
+	}
+	if (! empty($props['geom:bbox'])) {
+		$bbox = $props['geom:bbox'];
+	}
+	if (! empty($props['geom:latitude']) &&
+	    ! empty($props['geom:longitude'])) {
+		$latlng = "{$props['geom:latitude']},{$props['geom:longitude']}";
+	}
+	if (! empty($props['addr:full'])) {
+		$address = $props['addr:full'];
+	} else if (! empty($props['sg:address'])) {
+		$address = $props['sg:address'];
+		if (! empty($props['sg:city'])) {
+			$address .= ", {$props['sg:city']}";
+		}
+		if (! empty($props['sg:province'])) {
+			$address .= ", {$props['sg:province']}";
+		}
+		if (! empty($props['sg:postcode'])) {
+			$address .= " {$props['sg:postcode']}";
+		}
+	}
+} else if (! empty($_GET['geojson']) &&
+           is_numeric($_GET['geojson'])) {
+	$json = get_wof_json($_GET['geojson']);
+	header('Content-Type: application/json');
+	echo $json;
+	exit;
+}
+
+function get_wof_json($id) {
 	$path = '';
 	for ($i = 0; $i < strlen("$id"); $i += 3) {
 		$path .= substr("$id", $i, 3) . '/';
@@ -45,34 +83,7 @@ if (preg_match('/^\/(\d+)/', $_SERVER['REQUEST_URI'], $matches)) {
 			file_put_contents($cache_path, $json);
 		}
 	}
-	$wof = json_decode($json, 'as hash');
-	$props = $wof['properties'];
-	if (! empty($props['wof:name'])) {
-		$title = "{$props['wof:name']} | All of the Places";
-	} else {
-		$title = "Place $id | All of the Places";
-	}
-	if (! empty($props['geom:bbox'])) {
-		$bbox = $props['geom:bbox'];
-	}
-	if (! empty($props['geom:latitude']) &&
-	    ! empty($props['geom:longitude'])) {
-		$latlng = "{$props['geom:latitude']},{$props['geom:longitude']}";
-	}
-	if (! empty($props['addr:full'])) {
-		$address = $props['addr:full'];
-	} else if (! empty($props['sg:address'])) {
-		$address = $props['sg:address'];
-		if (! empty($props['sg:city'])) {
-			$address .= ", {$props['sg:city']}";
-		}
-		if (! empty($props['sg:province'])) {
-			$address .= ", {$props['sg:province']}";
-		}
-		if (! empty($props['sg:postcode'])) {
-			$address .= " {$props['sg:postcode']}";
-		}
-	}
+	return $json;
 }
 
 ?>

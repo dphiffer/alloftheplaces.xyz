@@ -14,6 +14,15 @@ body {
 	margin-top: 0;
 }
 
+.leaflet-popup-content a {
+	font-weight: normal;
+	color: #000;
+}
+
+.leaflet-popup-content a:hover {
+	background: #dedede;
+}
+
 .icon {
 	background-image: url(/lib/walkabout/images/poi_icons_18@2x.png);
 	background-size: 502px 247px;
