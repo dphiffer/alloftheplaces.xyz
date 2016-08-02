@@ -18,12 +18,6 @@ var routing_tabs = '<div class="routing-tabs">' +
                    '<br class="clear">' +
                    '</div>';
 
-/*var geocoder = L.Mapzen.geocoder($(document.body).data('search-api-key'));
-geocoder.addTo(map);
-geocoder.on('select', function(e) {
-  console.log(e.feature);
-});*/
-
 if ($('#map').data('latlng')) {
 	var coords = $('#map').data('latlng').split(',');
 	var lat = parseFloat(coords[0]);
@@ -66,6 +60,14 @@ var map = L.Mapzen.map('map', map_options);
 if (bbox) {
 	map.fitBounds(bbox);
 }
+
+var geocoder = L.Mapzen.geocoder($(document.body).data('search-api-key'), {
+	url: ''
+});
+geocoder.addTo(map);
+geocoder.on('select', function(e) {
+  console.log(e.feature);
+});
 
 var zoom = new L.Control.Zoom({
 	position: 'bottomright'

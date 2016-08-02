@@ -123,10 +123,6 @@ function get_wof_json($id) {
 		var wof = <?php echo $json; ?>;
 
 		</script>
-		<?php } else { ?>
-		<form action="/" id="search-form" class="container floating">
-			<input id="search" name="q" type="text" data-provide="typeahead" autocomplete="off" placeholder="Search for a place">
-		</form>
 		<?php } ?>
 		<script src="/lib/jquery.min.js"></script>
 		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
