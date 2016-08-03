@@ -66,7 +66,20 @@ var geocoder = L.Mapzen.geocoder($(document.body).data('search-api-key'), {
 });
 geocoder.addTo(map);
 geocoder.on('select', function(e) {
-  console.log(e.feature);
+	if (e.feature) {
+		var props = e.feature.properties;
+		var base_url = location.protocol + '//' + location.host + '/';
+		if (props.source == 'whosonfirst') {
+			var url = base_url + props.source_id;
+		} else {
+			var url = base_url + props.gid;
+		}
+		history.pushState(e.feature, props.name, url);
+	}
+});
+geocoder.on('reset', function() {
+	var base_url = location.protocol + '//' + location.host + '/';
+	history.pushState(null, 'All of the Places', base_url);
 });
 
 var zoom = new L.Control.Zoom({
@@ -83,18 +96,6 @@ L.Mapzen.bug({
 var locator = L.Mapzen.locator();
 locator.setPosition('bottomright');
 locator.addTo(map);
-
-$("#search").typeahead({
-	source: [
-		"foo",
-		"bar",
-		"baz"
-	]
-});
-
-//L.Mapzen.hash({
-//	map: map
-//});
 
 if ($('#map').data('latlng')) {
 	var coords = $('#map').data('latlng').split(',');
@@ -114,7 +115,7 @@ if ($('#map').data('latlng')) {
 	    wof.properties['wof:parent_id']) {
 		var address = wof.properties['addr:housenumber'] + ' ' +
 		              wof.properties['addr:street'];
-		$.get('/?geojson=' + wof.properties['wof:parent_id'], function(parent) {
+		$.get('/?place=' + wof.properties['wof:parent_id'], function(parent) {
 			var parent_id = parent.properties['wof:id'];
 			var parent_name = parent.properties['wof:name'];
 			var parent_link = ', <a href="/' + parent_id + '">' + parent_name + '</a>';

@@ -16,6 +16,7 @@ if ($status == 200) {
 	$rsp = get($url);
 	$wof_results = json_decode($rsp['body'], 'as hash');
 
+	$count = 3; // We'll just insert 3 additional results from WOF
 	foreach ($wof_results['results'] as $wof) {
 		$gid = "whosonfirst:{$wof['wof:placetype']}:{$wof['wof:id']}";
 		array_unshift($search_results['features'], array(
@@ -36,8 +37,12 @@ if ($status == 200) {
 				'name' => $wof['wof:name'],
 				'label' => $wof['wof:name']
 			),
-			'bbox' => $wof['geom:bbox']
+			'bbox' => explode(',', $wof['geom:bbox'])
 		));
+		$count--;
+		if ($count == 0) {
+			break;
+		}
 	}
 	$body = json_encode($search_results);
 }

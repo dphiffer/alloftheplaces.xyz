@@ -7,18 +7,27 @@ require_once __DIR__ . '/config.php';
 
 $title = 'All of the Places';
 
-if (preg_match('/^\/(\d+)/', $_SERVER['REQUEST_URI'], $matches)) {
+if (preg_match('/^\/([^?]+)/', $_SERVER['REQUEST_URI'], $matches)) {
+
 	$id = $matches[1];
-	$json = get_wof_json($id);
-	$wof = json_decode($json, 'as hash');
-	$props = $wof['properties'];
+	$json = get_place_json($id);
+	if (empty($json)) {
+		include 'error.html';
+		exit;
+	}
+	$place = json_decode($json, 'as hash');
+	$props = $place['properties'];
 	if (! empty($props['wof:name'])) {
 		$title = "{$props['wof:name']} | All of the Places";
+	} else if (! empty($props['name'])) {
+		$title = "{$props['name']} | All of the Places";
 	} else {
 		$title = "Place $id | All of the Places";
 	}
 	if (! empty($props['geom:bbox'])) {
 		$bbox = $props['geom:bbox'];
+	} else if (! empty($props['bbox'])) {
+		$bbox = $props['bbox'];
 	}
 	if (! empty($props['geom:latitude']) &&
 	    ! empty($props['geom:longitude'])) {
@@ -38,12 +47,24 @@ if (preg_match('/^\/(\d+)/', $_SERVER['REQUEST_URI'], $matches)) {
 			$address .= " {$props['sg:postcode']}";
 		}
 	}
-} else if (! empty($_GET['geojson']) &&
-           is_numeric($_GET['geojson'])) {
-	$json = get_wof_json($_GET['geojson']);
+} else if (! empty($_GET['place'])) {
+	$json = get_place_json($_GET['place']);
 	header('Content-Type: application/json');
 	echo $json;
 	exit;
+}
+
+function get_place_json($id) {
+	if (is_numeric($id)) {
+		return get_wof_json($id);
+	} else if (preg_match('/^whosonfirst:[^:]+:(\d+)$/', $id, $matches)) {
+		$wof_id = intval($matches[1]);
+		return get_wof_json($wof_id);
+	} else {
+		$json = get_pelias_json($id);
+		$result = json_decode($json, 'as hash');
+		return json_encode($result['features'][0], JSON_PRETTY_PRINT);
+	}
 }
 
 function get_wof_json($id) {
@@ -52,18 +73,33 @@ function get_wof_json($id) {
 		$path .= substr("$id", $i, 3) . '/';
 	}
 	$path .= "$id.geojson";
+	$url = "https://whosonfirst.mapzen.com/data/$path";
+
+	return get_json($path, $url);
+}
+
+function get_pelias_json($id) {
+	global $search_api_key;
+	$path = md5($id) . '.geojson';
+	$url = "https://search.mapzen.com/v1/place?ids=$id&api_key=$search_api_key";
+
+	return get_json($path, $url);
+}
+
+function get_json($path, $url) {
+	global $source_url;
 
 	$cache_path = __DIR__ . "/cache/$path";
 	$cache_expiry = time() - 7200;
+	$source_url = $url;
 
 	if (file_exists($cache_path) &&
 	    filemtime($cache_path) > $cache_expiry &&
 	    strpos($_SERVER['REQUEST_URI'], 'nocache') === false) {
 		$json = file_get_contents(__DIR__ . "/cache/$path");
 	} else {
-		$wof_url = "https://whosonfirst.mapzen.com/$path";
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $wof_url);
+		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_HEADER, 0);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		$json = curl_exec($ch);
@@ -99,10 +135,18 @@ function get_wof_json($id) {
 		<link rel="stylesheet" href="/lib/lrm-mapzen/dist/leaflet.routing.mapzen.css">
 		<link rel="stylesheet" href="/alloftheplaces.css">
 		<link rel="shortcut icon" href="https://mapzen.com/common/styleguide/images/favicon.ico">
+<?php if (! empty($props['wof:id'])) { ?>
 		<meta name="id" content="<?php echo htmlentities($props['wof:id']); ?>">
-		<?php if (! empty($address)) { ?>
+<?php } ?>
+<?php if (! empty($props['gid'])) { ?>
+		<meta name="id" content="<?php echo htmlentities($props['gid']); ?>">
+<?php } ?>
+<?php if (! empty($source_url)) { ?>
+		<meta name="source_url" content="<?php echo htmlentities($source_url); ?>">
+<?php } ?>
+<?php if (! empty($address)) { ?>
 		<meta name="address" content="<?php echo htmlentities($address); ?>">
-		<?php } ?>
+<?php } ?>
 		<script src="https://mapzen.com/js/mapzen.min.js"></script>
 	</head>
 	<body data-search-api-key="<?php echo htmlentities($search_api_key); ?>" data-routing-api-key="<?php echo htmlentities($routing_api_key); ?>">
@@ -117,13 +161,13 @@ function get_wof_json($id) {
 			}
 
 		?>></div>
-		<?php if (!empty($json)) { ?>
+<?php if (!empty($json)) { ?>
 		<script>
 
 		var wof = <?php echo $json; ?>;
 
 		</script>
-		<?php } ?>
+<?php } ?>
 		<script src="/lib/jquery.min.js"></script>
 		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
 		<script src="/lib/bootstrap-typeahead/bootstrap3-typeahead.min.js"></script>
