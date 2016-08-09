@@ -6,6 +6,7 @@ if (! file_exists(__DIR__ . '/config.php')) {
 require_once __DIR__ . '/config.php';
 
 $title = 'All of the Places';
+$json = 'null';
 
 if (preg_match('/^\/([^?]+)/', $_SERVER['REQUEST_URI'], $matches)) {
 
@@ -161,16 +162,13 @@ function get_json($path, $url) {
 			}
 
 		?>></div>
-<?php if (!empty($json)) { ?>
 		<script>
 
 		var wof = <?php echo $json; ?>;
 
 		</script>
-<?php } ?>
 		<script src="/lib/jquery.min.js"></script>
 		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
-		<script src="/lib/bootstrap-typeahead/bootstrap3-typeahead.min.js"></script>
 		<script src="https://mapzen.com/common/styleguide/scripts/mapzen-styleguide.min.js"></script>
 		<script src="/lib/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
 		<script src="/lib/lrm-mapzen/dist/lrm-mapzen.js"></script>

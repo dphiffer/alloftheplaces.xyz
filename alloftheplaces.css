@@ -154,6 +154,14 @@ body.routing .leaflet-top {
 	display: none;
 }
 
+.leaflet-top .leaflet-control {
+	margin-top: 5px;
+}
+
+.leaflet-pelias-expanded {
+	width: 320px;
+}
+
 .floating {
 	position: fixed;
 	top: 50%;

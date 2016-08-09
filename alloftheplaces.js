@@ -18,23 +18,23 @@ var routing_tabs = '<div class="routing-tabs">' +
                    '<br class="clear">' +
                    '</div>';
 
-if ($('#map').data('latlng')) {
-	var coords = $('#map').data('latlng').split(',');
-	var lat = parseFloat(coords[0]);
-	var lng = parseFloat(coords[1]);
-	map_options.center = [lat, lng];
-	map_options.zoom = 14;
-	if (! window.localStorage.units) {
-		$.get('https://ip.dev.mapzen.com/?raw=1', function(rsp) {
-			set_default_units(rsp.country_id);
-		});
-	}
-} else if ($('#map').data('bbox')) {
+if ($('#map').data('bbox')) {
 	var coords = $('#map').data('bbox').split(',');
 	var bbox = [
 		[parseFloat(coords[1]), parseFloat(coords[0])],
 		[parseFloat(coords[3]), parseFloat(coords[2])]
 	];
+	if (! window.localStorage.units) {
+		$.get('https://ip.dev.mapzen.com/?raw=1', function(rsp) {
+			set_default_units(rsp.country_id);
+		});
+	}
+} else if ($('#map').data('latlng')) {
+	var coords = $('#map').data('latlng').split(',');
+	var lat = parseFloat(coords[0]);
+	var lng = parseFloat(coords[1]);
+	map_options.center = [lat, lng];
+	map_options.zoom = 14;
 	if (! window.localStorage.units) {
 		$.get('https://ip.dev.mapzen.com/?raw=1', function(rsp) {
 			set_default_units(rsp.country_id);
@@ -61,8 +61,18 @@ if (bbox) {
 	map.fitBounds(bbox);
 }
 
+var marker_options = {
+	icon: L.divIcon({
+		className: 'icon icon-marker icon-marker-destination',
+		iconSize: [26, 43],
+		iconAnchor: [13, 43],
+		popupAnchor: [0, -43]
+	})
+}
+
 var geocoder = L.Mapzen.geocoder($(document.body).data('search-api-key'), {
-	url: ''
+	url: '',
+	markers: marker_options
 });
 geocoder.addTo(map);
 geocoder.on('select', function(e) {
@@ -71,15 +81,35 @@ geocoder.on('select', function(e) {
 		var base_url = location.protocol + '//' + location.host + '/';
 		if (props.source == 'whosonfirst') {
 			var url = base_url + props.source_id;
+			history.pushState(e.feature, props.name, url);
+			var latlng = e.feature.geometry.coordinates.reverse();
+			var marker = L.marker(latlng, marker_options).addTo(map);
+			$.get('/?place=' + props.source_id, function(rsp) {
+				wof = rsp;
+				show_wof(marker);
+			});
 		} else {
-			var url = base_url + props.gid;
+			var article = props.layer == 'address' ? 'An ' : 'A ';
+			var address = article + props.layer;
+			var wof_links_list_items = '<li><a href="#">(Nothing here yet)</a></li>';
+			var popup = '<h4>' + props.name + '</h4>' +
+			            '<span class="address">' + address + '</span>' +
+			            '<div class="buttons">' +
+			            '<button class="btn btn-mapzen btn-directions">Directions</button>' +
+			            '<div class="dropdown">' +
+			            '<button class="btn btn-default dropdown-toggle" type="button" id="wof-links" data-toggle="dropdown" aria-haspopup="true">' +
+			            'Links <span class="caret"></span>' +
+			            '</button>' +
+			            '<ul class="dropdown-menu" aria-labelledby="wof-links">' +
+			            wof_links_list_items +
+			            '</ul>' +
+			            '</div>' +
+			            '<div class="loading"><div class="loading-spinner-02"></div> Finding your location</div>' +
+			            '</div>';
+			geocoder.markers[0].setPopupContent(popup);
+			append_address_parent(props);
 		}
-		history.pushState(e.feature, props.name, url);
 	}
-});
-geocoder.on('reset', function() {
-	var base_url = location.protocol + '//' + location.host + '/';
-	history.pushState(null, 'All of the Places', base_url);
 });
 
 var zoom = new L.Control.Zoom({
@@ -101,31 +131,24 @@ if ($('#map').data('latlng')) {
 	var coords = $('#map').data('latlng').split(',');
 	var lat = parseFloat(coords[0]);
 	var lng = parseFloat(coords[1]);
-	marker = L.marker([lat, lng], {
-		icon: L.divIcon({
-			className: 'icon icon-marker icon-marker-destination',
-			iconSize: [26, 43],
-			iconAnchor: [13, 43],
-			popupAnchor: [0, -43]
-		})
-	}).addTo(map);
+	marker = L.marker([lat, lng], marker_options).addTo(map);
+	show_wof(marker);
+}
+
+function show_wof(marker) {
+	var latlng = wof.geometry.coordinates.reverse();
 	var address = '';
 	if (wof.properties['addr:housenumber'] &&
 	    wof.properties['addr:street'] &&
 	    wof.properties['wof:parent_id']) {
 		var address = wof.properties['addr:housenumber'] + ' ' +
 		              wof.properties['addr:street'];
-		$.get('/?place=' + wof.properties['wof:parent_id'], function(parent) {
-			var parent_id = parent.properties['wof:id'];
-			var parent_name = parent.properties['wof:name'];
-			var parent_link = ', <a href="/' + parent_id + '">' + parent_name + '</a>';
-			$('.address').append(parent_link);
-		});
+		append_address_parent(wof.properties['wof:parent_id']);
 	} else if ($('meta[name=address]').length > 0) {
 		var address = $('meta[name=address]').attr('content');
 	} else {
 		var address = 'A ' + wof.properties['wof:placetype'];
-		$.get('/?geojson=' + wof.properties['wof:parent_id'], function(parent) {
+		$.get('/?place=' + wof.properties['wof:parent_id'], function(parent) {
 			var parent_id = parent.properties['wof:id'];
 			var parent_name = parent.properties['wof:name'];
 			var parent_link = ' in <a href="/' + parent_id + '">' + parent_name + '</a>';
@@ -226,10 +249,7 @@ if ($('#map').data('latlng')) {
 	marker.bindPopup(popup).openPopup();
 	$('#map').click(function(e) {
 		if ($(e.target).hasClass('btn-directions')) {
-			get_directions({
-				latitude: lat,
-				longitude: lng
-			});
+			get_directions(latlng);
 		}
 	});
 	if (wof.geometry && wof.geometry.type != 'Point') {
@@ -243,6 +263,34 @@ if ($('#map').data('latlng')) {
 			}
 		});
 		layer.addTo(map);
+	}
+}
+
+function gid_to_wof_id(gid) {
+	var match = gid.match(/\d+$/);
+	if (match) {
+		return match[0];
+	}
+	return null;
+}
+
+function append_address_parent(arg) {
+	if (typeof arg == 'number') {
+		$.get('/?place=' + arg, function(parent) {
+			var parent_id = parent.properties['wof:id'];
+			var parent_name = parent.properties['wof:name'];
+			var parent_link = ', <a href="/' + parent_id + '">' + parent_name + '</a>';
+			$('.address').append(parent_link);
+		});
+	} else if (typeof arg == 'object') {
+		if (arg.layer == 'address' && arg.neighbourhood_gid) {
+			var parent_id = gid_to_wof_id(arg.neighbourhood_gid);
+			var parent_name = arg.neighbourhood;
+		}
+		if (parent_id && parent_name) {
+			var parent_link = ' in <a href="/' + parent_id + '">' + parent_name + '</a>';
+			$('.address').append(parent_link);
+		}
 	}
 }
 
@@ -285,7 +333,6 @@ function create_router(start_pos, dest_pos) {
 		start_pos.coords.latitude,
 		start_pos.coords.longitude
 	);
-	dest_pos = L.latLng(dest_pos.latitude, dest_pos.longitude);
 	var api_key = $(document.body).data('routing-api-key');
 	var dist = start_pos.distanceTo(dest_pos);
 
@@ -312,6 +359,8 @@ function create_router(start_pos, dest_pos) {
 	} else {
 		var units = 'metric';
 	}
+
+	var wof_name = wof.properties['wof:name'];
 
 	router = L.Routing.control({
 		waypoints: [start_pos, dest_pos],

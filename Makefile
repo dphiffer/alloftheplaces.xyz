@@ -1,5 +1,5 @@
 lrm_version = 3.0.3
-jquery_version = 3.0.0
+jquery_version = 3.1.0
 bootstrap_version = 3.3.6
 
 setup:
