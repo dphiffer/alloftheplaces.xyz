@@ -88,6 +88,9 @@ geocoder.on('select', function(e) {
 				wof = rsp;
 				show_wof(marker);
 			});
+			if (typeof ga == 'function') {
+				ga('send', 'pageview');
+			}
 		} else {
 			var article = props.layer == 'address' ? 'An ' : 'A ';
 			var address = article + props.layer;
