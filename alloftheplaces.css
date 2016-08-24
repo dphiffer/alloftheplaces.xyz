@@ -59,7 +59,7 @@ body.routing .leaflet-top {
 
 @media (min-width: 350px) {
 	.leaflet-routing-alt {
-		max-height: calc(100vh - 33px);
+		max-height: calc(100vh - 75px);
 	}
 	body.routing .leaflet-top {
 		position: absolute;

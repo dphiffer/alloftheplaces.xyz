@@ -77,6 +77,7 @@ var geocoder = L.Mapzen.geocoder($(document.body).data('search-api-key'), {
 geocoder.addTo(map);
 geocoder.on('select', function(e) {
 	if (e.feature) {
+		wof = e.feature;
 		var props = e.feature.properties;
 		var base_url = location.protocol + '//' + location.host + '/';
 		if (props.source == 'whosonfirst') {
@@ -138,12 +139,32 @@ if ($('#map').data('latlng')) {
 	show_wof(marker);
 }
 
+$('#map').click(function(e) {
+	if ($(e.target).hasClass('btn-directions') && wof) {
+		if (wof.properties['geom:latitude'] &&
+		    wof.properties['geom:longitude']) {
+			var dest = [
+				parseFloat(wof.properties['geom:latitude']),
+				parseFloat(wof.properties['geom:longitude'])
+			];
+		} else if (wof.geometry.type == 'Point') {
+			var dest = wof.geometry.coordinates.reverse();
+		}
+		if (dest) {
+			get_directions(dest);
+		} else {
+			console.log('Could not figure out the lat/lng.');
+		}
+	}
+});
+
 function show_wof(marker) {
 	var latlng = wof.geometry.coordinates.reverse();
 	var address = '';
 	if (wof.properties['addr:housenumber'] &&
 	    wof.properties['addr:street'] &&
-	    wof.properties['wof:parent_id']) {
+	    wof.properties['wof:parent_id'] &&
+	    wof.properties['wof:parent_id'] != -1) {
 		var address = wof.properties['addr:housenumber'] + ' ' +
 		              wof.properties['addr:street'];
 		append_address_parent(wof.properties['wof:parent_id']);
@@ -250,11 +271,7 @@ function show_wof(marker) {
 	            '<div class="loading"><div class="loading-spinner-02"></div> Finding your location</div>' +
 	            '</div>';
 	marker.bindPopup(popup).openPopup();
-	$('#map').click(function(e) {
-		if ($(e.target).hasClass('btn-directions')) {
-			get_directions(latlng);
-		}
-	});
+
 	if (wof.geometry && wof.geometry.type != 'Point') {
 		var layer = L.geoJson(wof, {
 			style: {
@@ -298,6 +315,8 @@ function append_address_parent(arg) {
 }
 
 function get_directions(dest_pos) {
+
+	console.log('get_directions');
 
 	$('#map').addClass('loading');
 	var just_loaded = true;
@@ -363,7 +382,7 @@ function create_router(start_pos, dest_pos) {
 		var units = 'metric';
 	}
 
-	var wof_name = wof.properties['wof:name'];
+	var wof_name = wof.properties['wof:name'] || wof.properties['name'];
 
 	router = L.Routing.control({
 		waypoints: [start_pos, dest_pos],
