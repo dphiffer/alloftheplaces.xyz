@@ -141,8 +141,14 @@ if ($('#map').data('latlng')) {
 
 $('#map').click(function(e) {
 	if ($(e.target).hasClass('btn-directions') && wof) {
-		if (wof.properties['geom:latitude'] &&
-		    wof.properties['geom:longitude']) {
+		if (wof.properties['lbl:latitude'] &&
+		    wof.properties['lbl:longitude']) {
+			var dest = [
+				parseFloat(wof.properties['lbl:latitude']),
+				parseFloat(wof.properties['lbl:longitude'])
+			];
+		} else if (wof.properties['geom:latitude'] &&
+		           wof.properties['geom:longitude']) {
 			var dest = [
 				parseFloat(wof.properties['geom:latitude']),
 				parseFloat(wof.properties['geom:longitude'])
@@ -315,8 +321,6 @@ function append_address_parent(arg) {
 }
 
 function get_directions(dest_pos) {
-
-	console.log('get_directions');
 
 	$('#map').addClass('loading');
 	var just_loaded = true;
