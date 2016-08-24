@@ -151,11 +151,10 @@ function get_json($path, $url) {
 <?php } ?>
 <?php if (! empty($id)) { ?>
 		<meta property="og:type" content="article">
-		<meta property="og:site_name" content="All of the Places" />
+		<meta property="og:site_name" content="All of the Places">
 		<meta property="og:title" content="<?php echo htmlentities($props['wof:name']); ?>">
 		<meta property="og:description" content="<?php echo htmlentities($address); ?>">
 		<meta property="og:image" content="https://whosonfirst.mapzen.com/images/wof-sq-pink.jpg">
-
 		<meta property="twitter:card" value="summary">
 		<meta property="twitter:site" content="@alloftheplaces">
 		<meta property="twitter:creator" content="@alloftheplaces">
@@ -165,11 +164,10 @@ function get_json($path, $url) {
 		<meta property="twitter:image" content="https://whosonfirst.mapzen.com/images/wof-sq-pink.jpg">
 <?php } else { ?>
 		<meta property="og:type" content="article">
-		<meta property="og:site_name" content="All of the Places" />
+		<meta property="og:site_name" content="All of the Places">
 		<meta property="og:title" content="All of the Places">
 		<meta property="og:description" content="<?php echo htmlentities($description); ?>">
 		<meta property="og:image" content="https://whosonfirst.mapzen.com/images/wof-sq-pink.jpg">
-
 		<meta property="twitter:card" value="summary">
 		<meta property="twitter:site" content="@alloftheplaces">
 		<meta property="twitter:creator" content="@alloftheplaces">
