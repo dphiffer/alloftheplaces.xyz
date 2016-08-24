@@ -7,6 +7,7 @@ require_once __DIR__ . '/config.php';
 
 $title = 'All of the Places';
 $description = 'Permalinks for Who’s On First places';
+$address = $description;
 $json = 'null';
 
 if (preg_match('/^\/([^?]+)/', $_SERVER['REQUEST_URI'], $matches)) {
@@ -135,7 +136,7 @@ function get_json($path, $url) {
 		<link rel="stylesheet" href="https://mapzen.com/js/mapzen.css">
 		<link rel="stylesheet" href="https://mapzen.com/common/styleguide/styles/styleguide.css">
 		<link rel="stylesheet" href="/lib/lrm-mapzen/dist/leaflet.routing.mapzen.css">
-		<link rel="stylesheet" href="/alloftheplaces.css">
+		<link rel="stylesheet" href="/alloftheplaces.css?rev=<?php echo filemtime('alloftheplaces.css'); ?>">
 		<link rel="shortcut icon" href="https://mapzen.com/common/styleguide/images/favicon.ico">
 <?php if (! empty($props['wof:id'])) { ?>
 		<meta name="id" content="<?php echo htmlentities($props['wof:id']); ?>">
@@ -201,7 +202,7 @@ function get_json($path, $url) {
 		<script src="/lib/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
 		<script src="/lib/lrm-mapzen/dist/lrm-mapzen.js"></script>
 		<script src="/lib/mapzen.whosonfirst.data.js"></script>
-		<script src="/alloftheplaces.js"></script>
+		<script src="/alloftheplaces.js?rev=<?php echo filemtime('alloftheplaces.js'); ?>"></script>
 		<?php if (! empty($google_analytics_ua)) { ?>
 
 		<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
