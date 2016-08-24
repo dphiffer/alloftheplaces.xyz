@@ -7,7 +7,6 @@ require_once __DIR__ . '/config.php';
 
 $title = 'All of the Places';
 $description = 'Permalinks for Who’s On First places';
-$address = $description;
 $json = 'null';
 
 if (preg_match('/^\/([^?]+)/', $_SERVER['REQUEST_URI'], $matches)) {
@@ -48,6 +47,10 @@ if (preg_match('/^\/([^?]+)/', $_SERVER['REQUEST_URI'], $matches)) {
 		}
 		if (! empty($props['sg:postcode'])) {
 			$address .= " {$props['sg:postcode']}";
+		}
+
+		if (! empty($address)) {
+			$description = $address;
 		}
 	}
 } else if (! empty($_GET['place'])) {
@@ -154,14 +157,14 @@ function get_json($path, $url) {
 		<meta property="og:type" content="article">
 		<meta property="og:site_name" content="All of the Places">
 		<meta property="og:title" content="<?php echo htmlentities($props['wof:name']); ?>">
-		<meta property="og:description" content="<?php echo htmlentities($address); ?>">
+		<meta property="og:description" content="<?php echo htmlentities($description); ?>">
 		<meta property="og:image" content="https://whosonfirst.mapzen.com/images/wof-sq-pink.jpg">
 		<meta property="twitter:card" value="summary">
 		<meta property="twitter:site" content="@alloftheplaces">
 		<meta property="twitter:creator" content="@alloftheplaces">
 		<meta property="twitter:url" content="https://alloftheplaces.xyz/<?php echo $id; ?>">
 		<meta property="twitter:title" content="<?php echo htmlentities($props['wof:name']); ?>">
-		<meta property="twitter:description" content="<?php echo htmlentities($address); ?>">
+		<meta property="twitter:description" content="<?php echo htmlentities($description); ?>">
 		<meta property="twitter:image" content="https://whosonfirst.mapzen.com/images/wof-sq-pink.jpg">
 <?php } else { ?>
 		<meta property="og:type" content="article">
